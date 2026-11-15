@@ -1,0 +1,906 @@
+{
+  "baseCommit": "e88ef65427ade4f7b14703325500c0ede975ca1b",
+  "perSetOptions": {
+    "setName": {
+      "type": "string",
+      "def": "",
+      "id": "setName",
+      "control": "input:text",
+      "section": "What to Block",
+      "summaryRole": "identity"
+    },
+    "sites": {
+      "type": "string",
+      "def": "",
+      "id": "sites",
+      "control": "textarea",
+      "section": "What to Block",
+      "summaryRole": "scope"
+    },
+    "sortSites": {
+      "type": "boolean",
+      "def": true,
+      "id": "sortSites",
+      "control": "input:checkbox",
+      "section": "What to Block",
+      "summaryRole": "editor-only"
+    },
+    "times": {
+      "type": "string",
+      "def": "",
+      "id": "times",
+      "control": "input:text",
+      "section": "When to Block",
+      "summaryRole": "rule-when"
+    },
+    "limitMins": {
+      "type": "string",
+      "def": "",
+      "id": "limitMins",
+      "control": "input:text",
+      "section": "When to Block",
+      "summaryRole": "rule-when"
+    },
+    "limitPeriod": {
+      "type": "string",
+      "def": "",
+      "id": "limitPeriod",
+      "control": "select",
+      "section": "When to Block",
+      "summaryRole": "rule-when"
+    },
+    "limitOffset": {
+      "type": "string",
+      "def": "",
+      "id": "limitOffset",
+      "control": "input:text",
+      "section": "Advanced Options",
+      "summaryRole": "rule-advanced"
+    },
+    "rollover": {
+      "type": "boolean",
+      "def": false,
+      "id": "rollover",
+      "control": "input:checkbox",
+      "section": "When to Block",
+      "summaryRole": "rule-advanced"
+    },
+    "conjMode": {
+      "type": "boolean",
+      "def": false,
+      "id": "conjMode",
+      "control": "select",
+      "section": "When to Block",
+      "summaryRole": "rule-when"
+    },
+    "days": {
+      "type": "array",
+      "def": [
+        false,
+        true,
+        true,
+        true,
+        true,
+        true,
+        false
+      ],
+      "id": "day",
+      "control": "input:checkbox",
+      "section": "When to Block",
+      "summaryRole": "rule-when"
+    },
+    "blockURL": {
+      "type": "string",
+      "def": "blocked.html?$S&$U",
+      "id": "blockURL",
+      "control": "input:text",
+      "section": "How to Block",
+      "summaryRole": "rule-action"
+    },
+    "passwordRequire": {
+      "type": "string",
+      "def": "0",
+      "id": "passwordRequire",
+      "control": "select",
+      "section": "How to Block",
+      "summaryRole": "rule-action"
+    },
+    "passwordSetSpec": {
+      "type": "string",
+      "def": "",
+      "id": "passwordSetSpec",
+      "control": "input:password",
+      "section": "How to Block",
+      "summaryRole": "rule-action"
+    },
+    "customMsg": {
+      "type": "string",
+      "def": "",
+      "id": "customMsg",
+      "control": "textarea",
+      "section": "How to Block",
+      "summaryRole": "rule-action"
+    },
+    "incogMode": {
+      "type": "string",
+      "def": "0",
+      "id": "incogMode",
+      "control": "select",
+      "section": "How to Block",
+      "summaryRole": "rule-advanced"
+    },
+    "activeTabMode": {
+      "type": "string",
+      "def": "0",
+      "id": "activeTabMode",
+      "control": "select",
+      "section": "How to Block",
+      "summaryRole": "rule-advanced"
+    },
+    "applyFilter": {
+      "type": "boolean",
+      "def": false,
+      "id": "applyFilter",
+      "control": "input:checkbox",
+      "section": "How to Block",
+      "summaryRole": "rule-action"
+    },
+    "filterName": {
+      "type": "string",
+      "def": "grayscale",
+      "id": "filterName",
+      "control": "select",
+      "section": "How to Block",
+      "summaryRole": "rule-action"
+    },
+    "filterMute": {
+      "type": "boolean",
+      "def": false,
+      "id": "filterMute",
+      "control": "input:checkbox",
+      "section": "How to Block",
+      "summaryRole": "rule-action"
+    },
+    "filterCustom": {
+      "type": "string",
+      "def": "",
+      "id": "filterCustom",
+      "control": "input:text",
+      "section": "How to Block",
+      "summaryRole": "rule-action"
+    },
+    "closeTab": {
+      "type": "boolean",
+      "def": false,
+      "id": "closeTab",
+      "control": "input:checkbox",
+      "section": "How to Block",
+      "summaryRole": "rule-action"
+    },
+    "activeBlock": {
+      "type": "boolean",
+      "def": false,
+      "id": "activeBlock",
+      "control": "input:checkbox",
+      "section": "How to Block",
+      "summaryRole": "rule-advanced"
+    },
+    "minBlock": {
+      "type": "string",
+      "def": "",
+      "id": "minBlock",
+      "control": "input:text",
+      "section": "How to Block",
+      "summaryRole": "rule-advanced"
+    },
+    "countFocus": {
+      "type": "boolean",
+      "def": true,
+      "id": "countFocus",
+      "control": "input:checkbox",
+      "section": "When to Block",
+      "summaryRole": "rule-advanced"
+    },
+    "countAllowed": {
+      "type": "boolean",
+      "def": false,
+      "id": "countAllowed",
+      "control": "input:checkbox",
+      "section": "When to Block",
+      "summaryRole": "rule-advanced"
+    },
+    "countAudio": {
+      "type": "boolean",
+      "def": false,
+      "id": "countAudio",
+      "control": "input:checkbox",
+      "section": "When to Block",
+      "summaryRole": "rule-advanced"
+    },
+    "showKeyword": {
+      "type": "boolean",
+      "def": true,
+      "id": "showKeyword",
+      "control": "input:checkbox",
+      "section": "How to Block",
+      "summaryRole": "cosmetic"
+    },
+    "titleOnly": {
+      "type": "boolean",
+      "def": false,
+      "id": "titleOnly",
+      "control": "input:checkbox",
+      "section": "How to Block",
+      "summaryRole": "rule-advanced"
+    },
+    "delayFirst": {
+      "type": "boolean",
+      "def": true,
+      "id": "delayFirst",
+      "control": "input:checkbox",
+      "section": "How to Block",
+      "summaryRole": "rule-action"
+    },
+    "delayFirstMode": {
+      "type": "string",
+      "def": "0",
+      "id": "delayFirstMode",
+      "control": "select",
+      "section": "How to Block",
+      "summaryRole": "rule-action"
+    },
+    "delaySecs": {
+      "type": "string",
+      "def": "60",
+      "id": "delaySecs",
+      "control": "input:text",
+      "section": "How to Block",
+      "summaryRole": "rule-action"
+    },
+    "delayAllowMins": {
+      "type": "string",
+      "def": "",
+      "id": "delayAllowMins",
+      "control": "input:text",
+      "section": "How to Block",
+      "summaryRole": "rule-action"
+    },
+    "delayAutoLoad": {
+      "type": "boolean",
+      "def": true,
+      "id": "delayAutoLoad",
+      "control": "input:checkbox",
+      "section": "How to Block",
+      "summaryRole": "rule-action"
+    },
+    "delayCancel": {
+      "type": "boolean",
+      "def": true,
+      "id": "delayCancel",
+      "control": "input:checkbox",
+      "section": "How to Block",
+      "summaryRole": "rule-action"
+    },
+    "reloadSecs": {
+      "type": "string",
+      "def": "",
+      "id": "reloadSecs",
+      "control": "input:text",
+      "section": "How to Block",
+      "summaryRole": "rule-advanced"
+    },
+    "addHistory": {
+      "type": "boolean",
+      "def": false,
+      "id": "addHistory",
+      "control": "input:checkbox",
+      "section": "How to Block",
+      "summaryRole": "rule-advanced"
+    },
+    "allowOverride": {
+      "type": "boolean",
+      "def": false,
+      "id": "allowOverride",
+      "control": "input:checkbox",
+      "section": "How to Block",
+      "summaryRole": "rule-exit"
+    },
+    "allowOverLock": {
+      "type": "boolean",
+      "def": true,
+      "id": "allowOverLock",
+      "control": "input:checkbox",
+      "section": "How to Block",
+      "summaryRole": "rule-exit"
+    },
+    "prevOpts": {
+      "type": "boolean",
+      "def": false,
+      "id": "prevOpts",
+      "control": "input:checkbox",
+      "section": "Advanced Options",
+      "summaryRole": "rule-protection"
+    },
+    "prevGenOpts": {
+      "type": "boolean",
+      "def": false,
+      "id": "prevGenOpts",
+      "control": "input:checkbox",
+      "section": "Advanced Options",
+      "summaryRole": "rule-protection"
+    },
+    "prevExts": {
+      "type": "boolean",
+      "def": false,
+      "id": "prevExts",
+      "control": "input:checkbox",
+      "section": "Advanced Options",
+      "summaryRole": "rule-protection"
+    },
+    "prevSettings": {
+      "type": "boolean",
+      "def": false,
+      "id": "prevSettings",
+      "control": "input:checkbox",
+      "section": "Advanced Options",
+      "summaryRole": "rule-protection"
+    },
+    "prevOverride": {
+      "type": "boolean",
+      "def": false,
+      "id": "prevOverride",
+      "control": "input:checkbox",
+      "section": "Advanced Options",
+      "summaryRole": "rule-protection"
+    },
+    "disable": {
+      "type": "boolean",
+      "def": false,
+      "id": "disable",
+      "control": "input:checkbox",
+      "section": "Advanced Options",
+      "summaryRole": "rule-state"
+    },
+    "showTimer": {
+      "type": "boolean",
+      "def": true,
+      "id": "showTimer",
+      "control": "input:checkbox",
+      "section": "Advanced Options",
+      "summaryRole": "cosmetic"
+    },
+    "allowRefers": {
+      "type": "boolean",
+      "def": false,
+      "id": "allowRefers",
+      "control": "input:checkbox",
+      "section": "Advanced Options",
+      "summaryRole": "rule-advanced"
+    },
+    "allowKeywords": {
+      "type": "boolean",
+      "def": false,
+      "id": "allowKeywords",
+      "control": "input:checkbox",
+      "section": "Advanced Options",
+      "summaryRole": "rule-advanced"
+    },
+    "waitSecs": {
+      "type": "string",
+      "def": "",
+      "id": "waitSecs",
+      "control": "input:text",
+      "section": "Advanced Options",
+      "summaryRole": "rule-advanced"
+    },
+    "sitesURL": {
+      "type": "string",
+      "def": "",
+      "id": "sitesURL",
+      "control": "input:text",
+      "section": "Advanced Options",
+      "summaryRole": "scope"
+    },
+    "regexpBlock": {
+      "type": "string",
+      "def": "",
+      "id": "regexpBlock",
+      "control": "input:text",
+      "section": "Advanced Options",
+      "summaryRole": "scope"
+    },
+    "regexpAllow": {
+      "type": "string",
+      "def": "",
+      "id": "regexpAllow",
+      "control": "input:text",
+      "section": "Advanced Options",
+      "summaryRole": "scope"
+    },
+    "regexpKeyword": {
+      "type": "string",
+      "def": "",
+      "id": "regexpKeyword",
+      "control": "input:text",
+      "section": "Advanced Options",
+      "summaryRole": "scope"
+    },
+    "ignoreHash": {
+      "type": "boolean",
+      "def": true,
+      "id": "ignoreHash",
+      "control": "input:checkbox",
+      "section": "Advanced Options",
+      "summaryRole": "rule-advanced"
+    }
+  },
+  "generalOptions": {
+    "simplified": {
+      "type": "boolean",
+      "def": true,
+      "id": null,
+      "control": "internal",
+      "section": "Internal state",
+      "affectsRuleSummary": false
+    },
+    "numSets": {
+      "type": "string",
+      "def": "6",
+      "id": "numSets",
+      "control": "input:text",
+      "section": "Block Sets",
+      "affectsRuleSummary": false
+    },
+    "sync": {
+      "type": "boolean",
+      "def": false,
+      "id": "syncStorage",
+      "control": "input:checkbox",
+      "section": "Miscellaneous",
+      "affectsRuleSummary": false
+    },
+    "theme": {
+      "type": "string",
+      "def": "",
+      "id": "theme",
+      "control": "select",
+      "section": "Appearance",
+      "affectsRuleSummary": false
+    },
+    "customStyle": {
+      "type": "string",
+      "def": "",
+      "id": "customStyle",
+      "control": "textarea",
+      "section": "Appearance",
+      "affectsRuleSummary": false
+    },
+    "oa": {
+      "type": "string",
+      "def": "0",
+      "id": "optionsAccess",
+      "control": "select",
+      "section": "Access Control",
+      "affectsRuleSummary": false
+    },
+    "password": {
+      "type": "string",
+      "def": "",
+      "id": "accessPassword",
+      "control": "input:password",
+      "section": "Access Control",
+      "affectsRuleSummary": false
+    },
+    "hpp": {
+      "type": "boolean",
+      "def": true,
+      "id": "hidePassword",
+      "control": "input:checkbox",
+      "section": "Access Control",
+      "affectsRuleSummary": false
+    },
+    "apt": {
+      "type": "string",
+      "def": "",
+      "id": "accessPreventTimes",
+      "control": "input:text",
+      "section": "Access Control",
+      "affectsRuleSummary": false
+    },
+    "timerVisible": {
+      "type": "boolean",
+      "def": true,
+      "id": "timerVisible",
+      "control": "input:checkbox",
+      "section": "Countdown Timer",
+      "affectsRuleSummary": false
+    },
+    "timerSize": {
+      "type": "string",
+      "def": "1",
+      "id": "timerSize",
+      "control": "select",
+      "section": "Countdown Timer",
+      "affectsRuleSummary": false
+    },
+    "timerLocation": {
+      "type": "string",
+      "def": "0",
+      "id": "timerLocation",
+      "control": "select",
+      "section": "Countdown Timer",
+      "affectsRuleSummary": false
+    },
+    "timerMaxHours": {
+      "type": "string",
+      "def": "24",
+      "id": "timerMaxHours",
+      "control": "input:text",
+      "section": "Countdown Timer",
+      "affectsRuleSummary": false
+    },
+    "timerBadge": {
+      "type": "boolean",
+      "def": true,
+      "id": "timerBadge",
+      "control": "input:checkbox",
+      "section": "Countdown Timer",
+      "affectsRuleSummary": false
+    },
+    "orm": {
+      "type": "string",
+      "def": "",
+      "id": "overrideMins",
+      "control": "input:text",
+      "section": "Temporary Override",
+      "affectsRuleSummary": true
+    },
+    "orln": {
+      "type": "string",
+      "def": "",
+      "id": "overrideLimitNum",
+      "control": "input:text",
+      "section": "Temporary Override",
+      "affectsRuleSummary": true
+    },
+    "orlp": {
+      "type": "string",
+      "def": "",
+      "id": "overrideLimitPeriod",
+      "control": "select",
+      "section": "Temporary Override",
+      "affectsRuleSummary": true
+    },
+    "ora": {
+      "type": "string",
+      "def": "0",
+      "id": "overrideAccess",
+      "control": "select",
+      "section": "Temporary Override",
+      "affectsRuleSummary": true
+    },
+    "orcode": {
+      "type": "string",
+      "def": "",
+      "id": "overrideCode",
+      "control": "input:text",
+      "section": "Temporary Override",
+      "affectsRuleSummary": false
+    },
+    "orp": {
+      "type": "string",
+      "def": "",
+      "id": "overridePassword",
+      "control": "input:password",
+      "section": "Temporary Override",
+      "affectsRuleSummary": false
+    },
+    "orc": {
+      "type": "boolean",
+      "def": true,
+      "id": "overrideConfirm",
+      "control": "input:checkbox",
+      "section": "Temporary Override",
+      "affectsRuleSummary": false
+    },
+    "orlps": {
+      "type": "number",
+      "def": 0,
+      "id": null,
+      "control": "internal",
+      "section": "Internal state",
+      "affectsRuleSummary": false
+    },
+    "orlc": {
+      "type": "number",
+      "def": 0,
+      "id": null,
+      "control": "internal",
+      "section": "Internal state",
+      "affectsRuleSummary": false
+    },
+    "oret": {
+      "type": "number",
+      "def": 0,
+      "id": null,
+      "control": "internal",
+      "section": "Internal state",
+      "affectsRuleSummary": false
+    },
+    "warnSecs": {
+      "type": "string",
+      "def": "",
+      "id": "warnSecs",
+      "control": "input:text",
+      "section": "Warning Message",
+      "affectsRuleSummary": false
+    },
+    "warnImmediate": {
+      "type": "boolean",
+      "def": true,
+      "id": "warnImmediate",
+      "control": "input:checkbox",
+      "section": "Warning Message",
+      "affectsRuleSummary": false
+    },
+    "contextMenu": {
+      "type": "boolean",
+      "def": true,
+      "id": "contextMenu",
+      "control": "input:checkbox",
+      "section": "Miscellaneous",
+      "affectsRuleSummary": false
+    },
+    "matchSubdomains": {
+      "type": "boolean",
+      "def": false,
+      "id": "matchSubdomains",
+      "control": "input:checkbox",
+      "section": "Miscellaneous",
+      "affectsRuleSummary": true
+    },
+    "disableLink": {
+      "type": "boolean",
+      "def": false,
+      "id": "disableLink",
+      "control": "input:checkbox",
+      "section": "Miscellaneous",
+      "affectsRuleSummary": false
+    },
+    "clockTimeFormat": {
+      "type": "string",
+      "def": "0",
+      "id": "clockTimeFormat",
+      "control": "select",
+      "section": "Miscellaneous",
+      "affectsRuleSummary": false
+    },
+    "saveSecs": {
+      "type": "string",
+      "def": "10",
+      "id": "saveSecs",
+      "control": "input:text",
+      "section": "Performance",
+      "affectsRuleSummary": false
+    },
+    "clockOffset": {
+      "type": "string",
+      "def": "",
+      "id": "clockOffset",
+      "control": "input:text",
+      "section": "Miscellaneous",
+      "affectsRuleSummary": true
+    },
+    "ignoreJumpSecs": {
+      "type": "string",
+      "def": "",
+      "id": "ignoreJumpSecs",
+      "control": "input:text",
+      "section": "Miscellaneous",
+      "affectsRuleSummary": false
+    },
+    "allFocused": {
+      "type": "boolean",
+      "def": false,
+      "id": "allFocused",
+      "control": "input:checkbox",
+      "section": "Miscellaneous",
+      "affectsRuleSummary": true
+    },
+    "useDocFocus": {
+      "type": "boolean",
+      "def": true,
+      "id": "useDocFocus",
+      "control": "input:checkbox",
+      "section": "Miscellaneous",
+      "affectsRuleSummary": true
+    },
+    "processTabsSecs": {
+      "type": "string",
+      "def": "1",
+      "id": "processTabsSecs",
+      "control": "input:text",
+      "section": "Performance",
+      "affectsRuleSummary": false
+    },
+    "processActiveTabs": {
+      "type": "boolean",
+      "def": false,
+      "id": "processActiveTabs",
+      "control": "input:checkbox",
+      "section": "Performance",
+      "affectsRuleSummary": false
+    },
+    "prevPastePassword": {
+      "type": "boolean",
+      "def": false,
+      "id": "prevPastePassword",
+      "control": "input:checkbox",
+      "section": "Miscellaneous",
+      "affectsRuleSummary": false
+    },
+    "accessCodeImage": {
+      "type": "boolean",
+      "def": true,
+      "id": "accessCodeImage",
+      "control": "input:checkbox",
+      "section": "Miscellaneous",
+      "affectsRuleSummary": false
+    },
+    "allowLBWebsite": {
+      "type": "boolean",
+      "def": true,
+      "id": "allowLBWebsite",
+      "control": "input:checkbox",
+      "section": "Miscellaneous",
+      "affectsRuleSummary": false
+    },
+    "diagMode": {
+      "type": "boolean",
+      "def": false,
+      "id": "diagMode",
+      "control": "input:checkbox",
+      "section": "Miscellaneous",
+      "affectsRuleSummary": false
+    },
+    "exportPasswords": {
+      "type": "boolean",
+      "def": false,
+      "id": "exportPasswords",
+      "control": "input:checkbox",
+      "section": "Export / Import",
+      "affectsRuleSummary": false
+    },
+    "autoExportSync": {
+      "type": "boolean",
+      "def": true,
+      "id": "autoExportSync",
+      "control": "input:checkbox",
+      "section": "Export / Import",
+      "affectsRuleSummary": false
+    },
+    "lockdownHours": {
+      "type": "string",
+      "def": "",
+      "id": null,
+      "control": "internal",
+      "section": "Internal state",
+      "affectsRuleSummary": false
+    },
+    "lockdownMins": {
+      "type": "string",
+      "def": "",
+      "id": null,
+      "control": "internal",
+      "section": "Internal state",
+      "affectsRuleSummary": false
+    }
+  },
+  "nonOptionFeatures": [
+    {
+      "id": "lockdown",
+      "name": "Blocco immediato (Lockdown)",
+      "files": [
+        "lockdown.html",
+        "lockdown.js",
+        "background.js"
+      ]
+    },
+    {
+      "id": "override",
+      "name": "Sblocco temporaneo (Override)",
+      "files": [
+        "override.html",
+        "override.js",
+        "background.js"
+      ]
+    },
+    {
+      "id": "add-sites",
+      "name": "Aggiunta siti da popup e menu contestuale",
+      "files": [
+        "add-sites.html",
+        "add-sites.js",
+        "popup.js",
+        "background.js"
+      ]
+    },
+    {
+      "id": "commands",
+      "name": "Scorciatoie da tastiera (commands)",
+      "files": [
+        "manifest.json",
+        "background.js"
+      ]
+    },
+    {
+      "id": "stats",
+      "name": "Statistiche e riavvio dei conteggi",
+      "files": [
+        "stats.html",
+        "stats.js",
+        "background.js"
+      ]
+    },
+    {
+      "id": "diagnostics",
+      "name": "Diagnostica",
+      "files": [
+        "diagnostics.html",
+        "diagnostics.js"
+      ]
+    },
+    {
+      "id": "timers-badge",
+      "name": "Timer su pagina e su icona (badge)",
+      "files": [
+        "content.js",
+        "content.css",
+        "background.js"
+      ]
+    },
+    {
+      "id": "warning-banner",
+      "name": "Avviso prima del blocco",
+      "files": [
+        "background.js",
+        "content.js",
+        "content.css"
+      ]
+    },
+    {
+      "id": "access-protection",
+      "name": "Protezione con password e codici",
+      "files": [
+        "options.js",
+        "override.js",
+        "password.html",
+        "blocked.js"
+      ]
+    },
+    {
+      "id": "sync-storage",
+      "name": "Archivio sincronizzato (storage.sync)",
+      "files": [
+        "options.js",
+        "background.js"
+      ]
+    },
+    {
+      "id": "managed-storage",
+      "name": "Archivio gestito (storage.managed)",
+      "files": [
+        "background.js"
+      ]
+    },
+    {
+      "id": "custom-block-pages",
+      "name": "Pagine di blocco personalizzate (*lb-custom*)",
+      "files": [
+        "manifest.json",
+        "blocked.js",
+        "background.js"
+      ]
+    }
+  ]
+}
