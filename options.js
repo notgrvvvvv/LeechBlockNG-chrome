@@ -829,10 +829,11 @@ function showClockOffsetTime() {
 	}
 }
 
-// Compile options for export
+// Compile options for export (strings are escaped unless escapeStrings is false)
 //
-function compileExportOptions(passwords) {
+function compileExportOptions(passwords, escapeStrings = true) {
 	let options = {};
+	let esc = escapeStrings ? escape : (str) => str;
 
 	// Per-set options
 	for (let set = 1; set <= gNumSets; set++) {
@@ -854,7 +855,7 @@ function compileExportOptions(passwords) {
 			} else if (type == "boolean") {
 				options[`${name}${set}`] = getElement(`${id}${set}`).checked;
 			} else if (type == "string") {
-				options[`${name}${set}`] = escape(getElement(`${id}${set}`).value);
+				options[`${name}${set}`] = esc(getElement(`${id}${set}`).value);
 			} else if (type == "array") {
 				let val = PER_SET_OPTIONS[name].def.slice();
 				for (let i = 0; i < val.length; i++) {
@@ -874,7 +875,7 @@ function compileExportOptions(passwords) {
 			if (type == "boolean") {
 				options[name] = getElement(id).checked;
 			} else if (type == "string") {
-				options[name] = escape(getElement(id).value);
+				options[name] = esc(getElement(id).value);
 			}
 		}
 	}
@@ -962,28 +963,18 @@ function downloadBlobFile(blob, filename) {
 function exportOptions() {
 	let exportPasswords = getElement("exportPasswords").checked;
 
-	let options = compileExportOptions(exportPasswords);
-
-	// Convert options to text lines
-	let lines = [];
-	for (let option in options) {
-		let value = options[option];
-		if (/^days\d+$/.test(option)) {
-			lines.push(option + "=" + encodeDays(value) + "\n");
-		} else {
-			lines.push(option + "=" + value + "\n");
-		}
-	}
+	let formOptions = compileExportOptions(exportPasswords, false);
+	let text = exportOptionsToText(formOptions, { includePasswords: exportPasswords });
 
 	// Create blob and download it
-	let blob = new Blob(lines, { type: "text/plain", endings: "native" });
+	let blob = new Blob([text], { type: "text/plain", endings: "native" });
 	let filename = DEFAULT_OPTIONS_FILE.replace("#", getTimestampSuffix());
 	downloadBlobFile(blob, filename);
 
 	$("#alertExportSuccess").dialog("open");
 }
 
-// Import options from text file
+// Import options from text or JSON file
 //
 function importOptions() {
 	let file = getElement("importFile").files[0];
@@ -1004,42 +995,27 @@ function importOptions() {
 			return;
 		}
 
-		// Extract options from text
-		let regexp = /^(\w+)=(.*)$/;
-		let lines = text.split(/[\n\r]+/);
-		let options = {};
-		let hasOptions = false;
-		for (let line of lines) {
-			let results = regexp.exec(line);
-			if (results) {
-				let option = results[1];
-				let value = results[2];
-				if (/^days\d+$/.test(option)) {
-					options[option] = decodeDays(value);
-				} else if (/^(true|false)$/.test(value)) {
-					options[option] = isTrue(value);
-				} else {
-					options[option] = value;
-				}
-				hasOptions = true;
-			}
+		// Passwords currently in the form (preserved if not imported)
+		let currentOptions = {
+			password: getElement("accessPassword").value,
+			orp: getElement("overridePassword").value,
+		};
+		for (let set = 1; set <= gNumSets; set++) {
+			currentOptions[`passwordSetSpec${set}`] = getElement(`passwordSetSpec${set}`).value;
 		}
 
-		if (!hasOptions) {
+		// Parse as JSON or text depending on file name and content
+		let isJSON = /\.json$/i.test(file.name || "") || /^[{\[]/.test(text.trim());
+		let result = isJSON
+			? importOptionsFromJSON(text, currentOptions)
+			: importOptionsFromText(text, currentOptions);
+
+		if (!result.ok) {
 			$("#alertImportError").dialog("open");
 			return;
 		}
 
-		// Preserve passwords if not imported
-		if (options["password"] == undefined) {
-			options["password"] = getElement("accessPassword").value;
-		}
-		if (options["orp"] == undefined) {
-			options["orp"] = getElement("overridePassword").value;
-		}
-
-		cleanOptions(options);
-		applyImportOptions(options);
+		applyImportOptions(result.options);
 
 		$("#tabs").tabs("option", "active", gNumSets);
 		$("#alertImportSuccess").dialog("open");
@@ -1051,10 +1027,8 @@ function importOptions() {
 function exportOptionsJSON() {
 	let exportPasswords = getElement("exportPasswords").checked;
 
-	let options = compileExportOptions(exportPasswords);
-
-	// Convert options to JSON string
-	let json = JSON.stringify(options);
+	let formOptions = compileExportOptions(exportPasswords, false);
+	let json = exportOptionsToJSON(formOptions, { includePasswords: exportPasswords });
 
 	// Create blob and download it
 	let blob = new Blob([json], { type: "application/json", endings: "native" });
