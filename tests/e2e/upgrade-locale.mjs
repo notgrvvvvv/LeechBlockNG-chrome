@@ -215,6 +215,7 @@ async function runLanguageScenario(config, port) {
 	fs.mkdirSync(extDir, { recursive: true });
 
 	let context = null;
+	let italianPopupLabels = null;
 	try {
 		// Step 1: Extract base e88ef65 into D, copy jquery-ui, launch Chromium
 		extractGitTree(BASE_COMMIT, extDir);
@@ -222,6 +223,18 @@ async function runLanguageScenario(config, port) {
 		let sw = await getServiceWorker(context);
 		const extId = new URL(sw.url()).host;
 		recordResult(uiLang, "base-load", Boolean(extId), `extId=${extId}`);
+
+		if (expectedHtmlLang === "it") {
+			const basePopup = await context.newPage();
+			await basePopup.goto(`chrome-extension://${extId}/it/popup.html`);
+			italianPopupLabels = await basePopup.evaluate(() => Object.fromEntries(
+				Array.from(document.querySelectorAll("#button-container button"), (button) => [
+					button.id, button.innerText.replace(/\s+/g, " ").trim(),
+				])
+			));
+			recordResult(uiLang, "base-italian-popup-labels", Object.keys(italianPopupLabels).length === 9);
+			await basePopup.close();
+		}
 
 		// Step 2: Seed settings in chrome.storage.local exactly as the base stores them
 		await sw.evaluate(async () => {
@@ -372,6 +385,11 @@ async function runLanguageScenario(config, port) {
 		await popupPage.waitForSelector("#options", { timeout: 10000 });
 		const popupInfo = await popupPage.evaluate(() => ({
 			htmlLang: document.documentElement.lang,
+			labels: Object.fromEntries(
+				Array.from(document.querySelectorAll("#button-container button"), (button) => [
+					button.id, button.innerText.replace(/\s+/g, " ").trim(),
+				])
+			),
 			optionsText: document.querySelector("#options")?.textContent?.trim() || "",
 			resetRolloverHasBr: document.querySelector("#resetRollover br") !== null,
 			discardTimeHasBr: document.querySelector("#discardTime br") !== null,
@@ -389,6 +407,20 @@ async function runLanguageScenario(config, port) {
 			`lang=${popupInfo.htmlLang}, #options="${popupInfo.optionsText}", #resetRollover<br>=${popupInfo.resetRolloverHasBr}, #discardTime<br>=${popupInfo.discardTimeHasBr}`
 		);
 		await popupPage.close();
+
+		if (italianPopupLabels) {
+			const mismatches = Object.keys(italianPopupLabels).filter(
+				(id) => popupInfo.labels[id] !== italianPopupLabels[id]
+			);
+			recordResult(
+				uiLang,
+				"upgrade-all-italian-popup-labels",
+				Object.keys(italianPopupLabels).length === 9
+					&& Object.keys(popupInfo.labels).length === 9
+					&& mismatches.length === 0,
+				`mismatched buttons: ${mismatches.join(", ") || "none"}`
+			);
+		}
 
 		// 4a. Visit 127.0.0.1/blocked -> expect chrome-extension://<id>/blocked.html?...
 		const blockedPage = await context.newPage();
