@@ -6,7 +6,7 @@
 		<meta charset="utf-8">
 		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 		<meta name="viewport" content="width=device-width, initial-scale=0.75, shrink-to-fit=no">
-		<title>Site Blocked</title>
+		<title data-i18n="blockedPageTitle">Site Blocked</title>
 		<link rel="shortcut icon" href="/icons/leechblock32.ico" type="image/x-icon">
 		<link rel="icon" href="/icons/leechblock32.ico" type="image/x-icon">
 		<link rel="stylesheet" href="/fonts.css" type="text/css">
@@ -24,31 +24,32 @@
 
 		<!-- warning message -->
 		<div id="lbWarningMsgDiv">
-			<h1>The page you're trying to access has been temporarily blocked by <a href="https://www.proginosko.com/leechblock/">LeechBlock</a>.</h1>
+			<h1 data-i18n="delayedWarning">The page you're trying to access has been temporarily blocked by <a href="https://www.proginosko.com/leechblock/" data-slot="link">LeechBlock</a>.</h1>
 		</div>
 
 		<!-- blocked site info -->
 		<div id="lbBlockedDiv">
 			<a id="lbBlockedURLLink" target="_self"><span id="lbBlockedURL"></span></a>
-			(<span id="lbBlockedSet">Block Set</span>)
-			<p id="lbKeywordMatched" style="display: none;">Keyword matched: <span id="lbKeywordMatch" class="keyword"></span></p>
-			<p id="lbCountdownText">The page will be unblocked in <span id="lbDelaySeconds" class="delay">0</span> second(s).</p>
+			(<span id="lbBlockedSet" data-i18n="blockedSetDefault">Block Set</span>)
+			<p id="lbKeywordMatched" style="display: none;" data-i18n="blockedKeywordMatched">Keyword matched: <span id="lbKeywordMatch" class="keyword"></span></p>
+			<p id="lbCountdownText" data-i18n="delayedCountdownText">The page will be unblocked in <span id="lbDelaySeconds" class="delay">0</span> second(s).</p>
 		</div>
 
 		<!-- custom message (optional) -->
 		<div id="lbCustomMsgDiv" style="display: none;">
-			<p>A message from yourself:</p>
+			<p data-i18n="blockedCustomMsgIntro">A message from yourself:</p>
 			<blockquote id="lbCustomMsg"></blockquote>
 		</div>
 
 		<!-- support info -->
-		<div id="lbSupportDiv" class="support">
-			LeechBlock will always be free to use, but if it has improved your life,<br>
-			please consider supporting its continued development by<br>
-			<a href="https://www.paypal.me/JamesNAnderson">making a contribution</a> or
-			<a href="https://chrome.google.com/webstore/detail/leechblock-ng/blaaajhemilngeeffpbfkdjjoefldkok">writing a review</a>.
+		<div id="lbSupportDiv" class="support" data-i18n="supportNotice">
+			LeechBlock will always be free to use, but if it has improved your life,<br data-slot="br1">
+			please consider supporting its continued development by<br data-slot="br2">
+			<a href="https://www.paypal.me/JamesNAnderson" data-slot="contribution" data-i18n="supportContributionLink">making a contribution</a> or
+			<a href="https://chrome.google.com/webstore/detail/leechblock-ng/blaaajhemilngeeffpbfkdjjoefldkok" data-slot="review" data-i18n="supportReviewLink">writing a review</a>.
 		</div>
 
+		<script src="/i18n.js"></script>
 		<script src="/blocked.js"></script>
 
 	</body>

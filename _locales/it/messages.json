@@ -11,8 +11,13 @@
 	},
 
 	"localePath": {
-		"message": "/it/",
+		"message": "/",
 		"description": "Percorso dei file localizzati."
+	},
+
+	"htmlLang": {
+		"message": "it",
+		"description": "Codice lingua per l'attributo HTML lang."
 	},
 
 	"optionsMenuItem": { "message": "Opzioni" },
@@ -29,6 +34,66 @@
 
 	"addPageMenuItem": { "message": "Aggiungi pagina" },
 
-	"addPageToBlockSetMenuItem": { "message": "Aggiungi pagina a Lista blocco" }
+	"addPageToBlockSetMenuItem": { "message": "Aggiungi pagina a Lista blocco" },
+
+	"commandOptions": { "message": "Apri la pagina delle opzioni" },
+
+	"commandStatistics": { "message": "Apri la pagina delle statistiche" },
+
+	"commandLockdown": { "message": "Attiva lockdown" },
+
+	"commandOverride": { "message": "Attiva permesso" },
+
+	"commandCancelOverride": { "message": "Annulla permesso" },
+
+	"commandAddSites": { "message": "Aggiungi siti a Lista blocco" },
+
+	"commandResetRollover": { "message": "Reimposta il tempo di rollover" },
+
+	"commandDiscardTime": { "message": "Scarta il tempo rimanente" },
+
+	"popupOptions": { "message": "Opzioni" },
+
+	"popupLockdown": { "message": "Lockdown" },
+
+	"popupOverride": { "message": "Permetti" },
+
+	"popupStatistics": { "message": "Statistiche" },
+
+	"popupAddSites": { "message": "Aggiungi Siti" },
+
+	"popupCancelOverride": { "message": "Annulla Permesso" },
+
+	"popupResetRollover": { "message": "Reimposta il Tempo di Rollover" },
+
+	"popupDiscardTime": { "message": "Scarta il Tempo Rimanente" },
+
+	"popupOnlineSupport": { "message": "Supporto Online" },
+
+	"blockedPageTitle": { "message": "Sito bloccato" },
+
+	"blockedWarning": { "message": "La pagina a cui stai tentando di accedere è stata bloccata da {link}." },
+
+	"delayedWarning": { "message": "La pagina a cui stai tentando di accedere è stata temporaneamente bloccata da {link}." },
+
+	"blockedSetDefault": { "message": "Lista blocco" },
+
+	"blockedKeywordMatched": { "message": "Parole chiave corrispondenti: {lbKeywordMatch}" },
+
+	"blockedUnblockText": { "message": "La pagina verrà sbloccata il: {lbUnblockTime}" },
+
+	"blockedEndOfTime": { "message": "la fine dei tempi" },
+
+	"delayedCountdownText": { "message": "La pagina verrà sbloccata tra {lbDelaySeconds} secondi." },
+
+	"passwordPrompt": { "message": "Inserisci la password per accedere alla pagina bloccata:" },
+
+	"blockedCustomMsgIntro": { "message": "Un messaggio da te stesso:" },
+
+	"supportNotice": { "message": "LeechBlock sarà sempre gratuito, ma se ha migliorato la tua vita,{br1}per piacere, considera di supportare lo sviluppo continuo{br2}{contribution} o {review}." },
+
+	"supportContributionLink": { "message": "con una donazione" },
+
+	"supportReviewLink": { "message": "scrivendo una recensione" }
 
 }
