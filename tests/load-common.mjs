@@ -51,6 +51,7 @@ const EXPORTED_SYMBOLS = [
 	"decodeDays",
 	"createAccessCode",
 	"setTheme",
+	"normalizeLegacyBlockURL",
 	"getLocalizedURL",
 	"getCleanURL",
 	"hashCode32",

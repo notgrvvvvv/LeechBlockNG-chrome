@@ -641,6 +641,8 @@ function retrieveOptions() {
 				// Set component value
 				if (name == "sites") {
 					getElement(`${id}${set}`).value = val.replace(/\s+/g, "\n");
+				} else if (name == "blockURL") {
+					getElement(`${id}${set}`).value = normalizeLegacyBlockURL(val);
 				} else if (name == "conjMode") {
 					getElement(`${id}${set}`).selectedIndex = val ? 1 : 0;
 				} else if (type == "boolean") {
@@ -899,6 +901,8 @@ function applyImportOptions(options) {
 				// Set component value
 				if (name == "sites") {
 					getElement(`${id}${set}`).value = val.replace(/\s+/g, "\n");
+				} else if (name == "blockURL") {
+					getElement(`${id}${set}`).value = normalizeLegacyBlockURL(unescape(val));
 				} else if (name == "conjMode") {
 					getElement(`${id}${set}`).selectedIndex = val ? 1 : 0;
 				} else if (type == "boolean") {

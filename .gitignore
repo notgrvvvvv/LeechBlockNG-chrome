@@ -6,3 +6,4 @@
 *.zip
 
 jquery-ui/**
+tests/e2e/node_modules/

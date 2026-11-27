@@ -20,28 +20,28 @@
 
 	"commands": {
 		"lb-options": {
-			"description": "Open the options page"
+			"description": "__MSG_commandOptions__"
 		},
 		"lb-statistics": {
-			"description": "Open the statistics page"
+			"description": "__MSG_commandStatistics__"
 		},
 		"lb-lockdown": {
-			"description": "Activate lockdown"
+			"description": "__MSG_commandLockdown__"
 		},
 		"lb-override": {
-			"description": "Activate override"
+			"description": "__MSG_commandOverride__"
 		},
 		"lb-cancel-override": {
-			"description": "Cancel override"
+			"description": "__MSG_commandCancelOverride__"
 		},
 		"lb-add-sites": {
-			"description": "Add sites to block set"
+			"description": "__MSG_commandAddSites__"
 		},
 		"lb-reset-rollover": {
-			"description": "Reset rollover time"
+			"description": "__MSG_commandResetRollover__"
 		},
 		"lb-discard-time": {
-			"description": "Discard remaining time"
+			"description": "__MSG_commandDiscardTime__"
 		}
 	},
 

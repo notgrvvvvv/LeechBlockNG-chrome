@@ -15,6 +15,11 @@
 		"description": "Path to localized files."
 	},
 
+	"htmlLang": {
+		"message": "en",
+		"description": "Language code for the HTML lang attribute."
+	},
+
 	"optionsMenuItem": { "message": "Options" },
 
 	"lockdownMenuItem": { "message": "Lockdown" },
@@ -29,6 +34,66 @@
 
 	"addPageMenuItem": { "message": "Add Page" },
 
-	"addPageToBlockSetMenuItem": { "message": "Add Page to Block Set" }
+	"addPageToBlockSetMenuItem": { "message": "Add Page to Block Set" },
+
+	"commandOptions": { "message": "Open the options page" },
+
+	"commandStatistics": { "message": "Open the statistics page" },
+
+	"commandLockdown": { "message": "Activate lockdown" },
+
+	"commandOverride": { "message": "Activate override" },
+
+	"commandCancelOverride": { "message": "Cancel override" },
+
+	"commandAddSites": { "message": "Add sites to block set" },
+
+	"commandResetRollover": { "message": "Reset rollover time" },
+
+	"commandDiscardTime": { "message": "Discard remaining time" },
+
+	"popupOptions": { "message": "Options" },
+
+	"popupLockdown": { "message": "Lockdown" },
+
+	"popupOverride": { "message": "Override" },
+
+	"popupStatistics": { "message": "Statistics" },
+
+	"popupAddSites": { "message": "Add Sites" },
+
+	"popupCancelOverride": { "message": "Cancel Override" },
+
+	"popupResetRollover": { "message": "Reset Rollover Time" },
+
+	"popupDiscardTime": { "message": "Discard Remaining Time" },
+
+	"popupOnlineSupport": { "message": "Online Support" },
+
+	"blockedPageTitle": { "message": "Site Blocked" },
+
+	"blockedWarning": { "message": "The page you're trying to access has been blocked by {link}." },
+
+	"delayedWarning": { "message": "The page you're trying to access has been temporarily blocked by {link}." },
+
+	"blockedSetDefault": { "message": "Block Set" },
+
+	"blockedKeywordMatched": { "message": "Keyword matched: {lbKeywordMatch}" },
+
+	"blockedUnblockText": { "message": "The page will be unblocked at: {lbUnblockTime}" },
+
+	"blockedEndOfTime": { "message": "the end of time" },
+
+	"delayedCountdownText": { "message": "The page will be unblocked in {lbDelaySeconds} second(s)." },
+
+	"passwordPrompt": { "message": "Enter the password to access the blocked page:" },
+
+	"blockedCustomMsgIntro": { "message": "A message from yourself:" },
+
+	"supportNotice": { "message": "LeechBlock will always be free to use, but if it has improved your life,{br1}please consider supporting its continued development by{br2}{contribution} or {review}." },
+
+	"supportContributionLink": { "message": "making a contribution" },
+
+	"supportReviewLink": { "message": "writing a review" }
 
 }
