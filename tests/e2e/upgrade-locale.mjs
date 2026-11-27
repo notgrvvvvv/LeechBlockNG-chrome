@@ -78,7 +78,12 @@ function extractGitTree(ref, targetDir) {
 			cwd: REPO_ROOT,
 			stdio: "pipe",
 		});
-		execFileSync("tar", ["-xf", tarPath, "-C", targetDir], {
+		// On Windows use the system bsdtar: a GNU tar found first on PATH (e.g. Git Bash)
+		// treats "C:\..." as a remote host and fails.
+		const tarBin = process.platform === "win32"
+			? path.join(process.env.SystemRoot || "C:\\Windows", "System32", "tar.exe")
+			: "tar";
+		execFileSync(tarBin, ["-xf", tarPath, "-C", targetDir], {
 			stdio: "pipe",
 		});
 	} finally {
@@ -261,6 +266,9 @@ async function runLanguageScenario(config, port) {
 		extractGitTree("HEAD", extDir);
 		// Clear Chromium's unpacked Service Worker script cache so updated importScripts("common.js")
 		// is loaded on relaunch (extension storage and ID in the profile remain untouched).
+		// background.js is byte-identical to the base, and with an unpacked extension even a
+		// manifest version bump keeps the stale cached common.js (observed 2026-11-27). Whether a
+		// real Web Store (.crx) update re-registers the worker is not covered here; check it manually.
 		fs.rmSync(path.join(userDataDir, "Default", "Service Worker"), { recursive: true, force: true });
 
 		// Step 4: Relaunch without opening Options, verify upgraded blocking & i18n
