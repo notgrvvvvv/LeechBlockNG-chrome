@@ -1,0 +1,11 @@
+{
+  "name": "leechblockng-e2e",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test:upgrade-locale": "node upgrade-locale.mjs"
+  },
+  "devDependencies": {
+    "playwright": "1.63.0"
+  }
+}

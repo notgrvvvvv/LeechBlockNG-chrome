@@ -18,6 +18,15 @@ Run all inventory and pure-function checks with:
 node --test tests/*.test.mjs
 ```
 
+### End-to-end upgrade check
+
+To verify real-browser extension upgrades from the upstream base (`e88ef65`) to `HEAD` across `de`, `it-CH`, `it`, and `en` UI locales (requires Playwright Chromium):
+
+```sh
+npm --prefix tests/e2e install
+node tests/e2e/upgrade-locale.mjs
+```
+
 ## Legacy localized block URLs
 
 Saved or imported `blockURL<N>` values matching the exact legacy internal form `^\/?(?:\w+\/)?((?:blocked|delayed|password)\.html\?\$S&\$U)$` (for example `it/blocked.html?$S&$U`, `/pt_BR/password.html?$S&$U`, or `/delayed.html?$S&$U`) are normalized to `<page>.html?$S&$U` by `normalizeLegacyBlockURL()` in `common.js` (called from `getLocalizedURL()` at runtime and when loading or importing options in `options.js`).
