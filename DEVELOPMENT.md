@@ -35,4 +35,3 @@ Absolute `chrome-extension://<id>/<lang>/...` URLs and all other variants (extra
 
 Updating `common.js:getLocalizedURL()` with this helper is the authorized surgical exception to the frozen blocking engine.
 
-

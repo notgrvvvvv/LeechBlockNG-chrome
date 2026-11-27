@@ -226,13 +226,14 @@ async function runLanguageScenario(config, port) {
 		// Step 2: Seed settings in chrome.storage.local exactly as the base stores them
 		await sw.evaluate(async () => {
 			const allDays = [true, true, true, true, true, true, true];
-			const re1 = getRegExpSites("127.0.0.1", false);
+			const re1 = getRegExpSites("127.0.0.1*/blocked", false);
 			const re2 = getRegExpSites("localhost", false);
+			const re3 = getRegExpSites("127.0.0.1*/delayed", false);
 			const seeded = {
 				numSets: "6",
 				sync: false,
 				autoExportSync: false,
-				sites1: "127.0.0.1",
+				sites1: "127.0.0.1*/blocked",
 				blockRE1: re1.block,
 				allowRE1: re1.allow,
 				referRE1: re1.refer,
@@ -254,6 +255,18 @@ async function runLanguageScenario(config, port) {
 				blockURL2: "it/password.html?$S&$U",
 				passwordRequire2: "0",
 				passwordSetSpec2: "secret123",
+				sites3: "127.0.0.1*/delayed",
+				blockRE3: re3.block,
+				allowRE3: re3.allow,
+				referRE3: re3.refer,
+				keywordRE3: re3.keyword,
+				times3: "0000-2400",
+				days3: allDays,
+				conjMode3: false,
+				disable3: false,
+				blockURL3: "it/delayed.html?$S&$U",
+				delaySecs3: "10",
+				delayCancel3: false,
 			};
 			await chrome.storage.local.set(seeded);
 		});
@@ -266,7 +279,7 @@ async function runLanguageScenario(config, port) {
 		await waitForOptionsLoaded(sw);
 
 		const basePage = await context.newPage();
-		const targetBaseUrl = `http://127.0.0.1:${port}/`;
+		const targetBaseUrl = `http://127.0.0.1:${port}/blocked`;
 		await basePage.goto(targetBaseUrl, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
 		// Check via chrome.tabs.query() because on non-en base locales, e88ef65 prepends localePath
 		// to "it/blocked.html?$S&$U" (e.g. "/de/it/blocked.html?..."), which 404s to chrome-error:// in page.url()
@@ -330,10 +343,32 @@ async function runLanguageScenario(config, port) {
 			`lb-options="${optionsCmd?.description || ""}" (expected "${expectedCommandOptions}")`
 		);
 
-		// 4.1 Verify popup.html localization and Italian line breaks
+		// 4.1 Verify popup URL from chrome.action.getPopup({}) and popup.html localization / Italian line breaks
+		const rawPopupUrl = await sw.evaluate(() => chrome.action.getPopup({}));
+		let resolvedPopupUrl = null;
+		try {
+			resolvedPopupUrl = new URL(rawPopupUrl, `chrome-extension://${extId}/`);
+		} catch {
+			resolvedPopupUrl = null;
+		}
+		const popupUrlOk = Boolean(
+			resolvedPopupUrl &&
+				resolvedPopupUrl.protocol === "chrome-extension:" &&
+				resolvedPopupUrl.host === extId &&
+				resolvedPopupUrl.pathname === "/popup.html"
+		);
+		recordResult(
+			uiLang,
+			"upgrade-popup-url",
+			popupUrlOk,
+			`getPopup()="${rawPopupUrl}", resolved=${resolvedPopupUrl ? resolvedPopupUrl.href : "invalid"}`
+		);
+
 		const popupPage = await context.newPage();
 		attachErrorCollectors(popupPage, extId, extensionErrors);
-		await popupPage.goto(`chrome-extension://${extId}/popup.html`, { waitUntil: "domcontentloaded" });
+		await popupPage.goto(resolvedPopupUrl ? resolvedPopupUrl.href : `chrome-extension://${extId}/popup.html`, {
+			waitUntil: "domcontentloaded",
+		});
 		await popupPage.waitForSelector("#options", { timeout: 10000 });
 		const popupInfo = await popupPage.evaluate(() => ({
 			htmlLang: document.documentElement.lang,
@@ -342,6 +377,7 @@ async function runLanguageScenario(config, port) {
 			discardTimeHasBr: document.querySelector("#discardTime br") !== null,
 		}));
 		const popupOk =
+			popupUrlOk &&
 			popupInfo.htmlLang === expectedHtmlLang &&
 			popupInfo.optionsText === expectedPopupOptions &&
 			popupInfo.resetRolloverHasBr === expectedResetRolloverHasBr &&
@@ -354,12 +390,12 @@ async function runLanguageScenario(config, port) {
 		);
 		await popupPage.close();
 
-		// 4a. Visit 127.0.0.1 -> expect chrome-extension://<id>/blocked.html?...
+		// 4a. Visit 127.0.0.1/blocked -> expect chrome-extension://<id>/blocked.html?...
 		const blockedPage = await context.newPage();
 		attachErrorCollectors(blockedPage, extId, extensionErrors);
 		const blockedUrl = await waitForRedirect(
 			blockedPage,
-			`http://127.0.0.1:${port}/`,
+			`http://127.0.0.1:${port}/blocked`,
 			(u) => {
 				try {
 					const parsed = new URL(u);
@@ -397,32 +433,90 @@ async function runLanguageScenario(config, port) {
 		);
 		await blockedPage.close();
 
-		// 4a-delayed. Open delayed.html with a real-redirect query and verify #lbDelaySeconds inside localized countdown
+		// 4a-delayed. Visit 127.0.0.1/delayed -> real redirect to chrome-extension://<id>/delayed.html?... and live countdown
 		const delayedPage = await context.newPage();
 		attachErrorCollectors(delayedPage, extId, extensionErrors);
-		await delayedPage.goto(
-			`chrome-extension://${extId}/delayed.html?1&http://127.0.0.1:${port}/`,
-			{ waitUntil: "domcontentloaded" }
+		const delayedUrl = await waitForRedirect(
+			delayedPage,
+			`http://127.0.0.1:${port}/delayed`,
+			(u) => {
+				try {
+					const parsed = new URL(u);
+					return parsed.protocol === "chrome-extension:" && parsed.host === extId && parsed.pathname === "/delayed.html";
+				} catch {
+					return false;
+				}
+			}
 		);
 		await delayedPage.waitForSelector("#lbCountdownText", { timeout: 10000 });
-		const delayedInfo = await delayedPage.evaluate(() => {
+		await delayedPage.waitForFunction(
+			() => {
+				const el = document.querySelector("#lbCountdownText #lbDelaySeconds");
+				return Boolean(el && Number.parseInt(el.textContent.trim(), 10) > 0);
+			},
+			{ timeout: 10000 }
+		);
+		const delayedInitial = await delayedPage.evaluate(() => {
 			const countdown = document.getElementById("lbCountdownText");
 			const delaySpan = countdown ? countdown.querySelector("#lbDelaySeconds") : null;
 			return {
+				url: location.href,
+				pathname: location.pathname,
 				htmlLang: document.documentElement.lang,
 				hasDelaySpanInCountdown: Boolean(delaySpan),
 				countdownText: countdown?.textContent?.trim() || "",
+				initialSeconds: delaySpan ? Number.parseInt(delaySpan.textContent.trim(), 10) : NaN,
 			};
 		});
-		const delayedOk =
-			delayedInfo.htmlLang === expectedHtmlLang &&
-			delayedInfo.hasDelaySpanInCountdown &&
-			expectedCountdownRegex.test(delayedInfo.countdownText);
+		const delayedUrlOk =
+			delayedUrl.startsWith(`chrome-extension://${extId}/delayed.html?`) &&
+			delayedInitial.pathname === "/delayed.html";
+		recordResult(uiLang, "upgrade-delayed-url", delayedUrlOk, `url=${delayedInitial.url}`);
+
+		let afterSeconds = delayedInitial.initialSeconds;
+		try {
+			await delayedPage.waitForFunction(
+				(startVal) => {
+					const el = document.querySelector("#lbCountdownText #lbDelaySeconds");
+					if (!el) return false;
+					const current = Number.parseInt(el.textContent.trim(), 10);
+					return Number.isFinite(current) && current < startVal;
+				},
+				delayedInitial.initialSeconds,
+				{ timeout: 5000 }
+			);
+			afterSeconds = await delayedPage.evaluate(() => {
+				const el = document.querySelector("#lbCountdownText #lbDelaySeconds");
+				return el ? Number.parseInt(el.textContent.trim(), 10) : NaN;
+			});
+		} catch {
+			afterSeconds = await delayedPage.evaluate(() => {
+				const el = document.querySelector("#lbCountdownText #lbDelaySeconds");
+				return el ? Number.parseInt(el.textContent.trim(), 10) : NaN;
+			});
+		}
+
+		const delayedI18nOk =
+			delayedInitial.htmlLang === expectedHtmlLang &&
+			delayedInitial.hasDelaySpanInCountdown &&
+			expectedCountdownRegex.test(delayedInitial.countdownText);
 		recordResult(
 			uiLang,
 			"upgrade-delayed-i18n",
-			delayedOk,
-			`lang=${delayedInfo.htmlLang}, #lbDelaySeconds=${delayedInfo.hasDelaySpanInCountdown}, countdown="${delayedInfo.countdownText}"`
+			delayedI18nOk,
+			`lang=${delayedInitial.htmlLang}, #lbDelaySeconds=${delayedInitial.hasDelaySpanInCountdown}, countdown="${delayedInitial.countdownText}"`
+		);
+
+		const delayedCountdownOk =
+			Number.isFinite(delayedInitial.initialSeconds) &&
+			delayedInitial.initialSeconds > 0 &&
+			Number.isFinite(afterSeconds) &&
+			afterSeconds < delayedInitial.initialSeconds;
+		recordResult(
+			uiLang,
+			"upgrade-delayed-countdown",
+			delayedCountdownOk,
+			`initial=${delayedInitial.initialSeconds}s -> after=${afterSeconds}s`
 		);
 		await delayedPage.close();
 

@@ -35,13 +35,28 @@
 		}
 	}
 
+	function getOutermostSlots(el) {
+		const candidates = Array.from(el.querySelectorAll("[id], [data-slot]"));
+		const candidateSet = new Set(candidates);
+		return candidates.filter((node) => {
+			let parent = node.parentElement;
+			while (parent && parent !== el) {
+				if (candidateSet.has(parent)) {
+					return false;
+				}
+				parent = parent.parentElement;
+			}
+			return true;
+		});
+	}
+
 	function applyMessage(el, message) {
 		if (el.tagName === "TITLE") {
 			document.title = message;
 			return;
 		}
 
-		const slotChildren = Array.from(el.querySelectorAll("[id], [data-slot]"));
+		const slotChildren = getOutermostSlots(el);
 		const hasPlaceholder = HAS_PLACEHOLDER.test(message);
 
 		if (!hasPlaceholder && slotChildren.length === 0) {
