@@ -15,26 +15,46 @@ const LANGUAGES = [
 	{
 		uiLang: "de",
 		expectedHtmlLang: "en",
+		expectedBlockedTitle: "Site Blocked",
 		expectedWarning: "The page you're trying to access has been blocked by LeechBlock.",
 		expectedPasswordPrompt: "Enter the password to access the blocked page:",
+		expectedPopupOptions: "Options",
+		expectedResetRolloverHasBr: false,
+		expectedCountdownRegex: /^The page will be unblocked in \d+ second\(s\)\.$/,
+		expectedCommandOptions: "Open the options page",
 	},
 	{
 		uiLang: "it-CH",
 		expectedHtmlLang: "it",
+		expectedBlockedTitle: "Sito bloccato",
 		expectedWarning: "La pagina a cui stai tentando di accedere è stata bloccata da LeechBlock.",
 		expectedPasswordPrompt: "Inserisci la password per accedere alla pagina bloccata:",
+		expectedPopupOptions: "Opzioni",
+		expectedResetRolloverHasBr: true,
+		expectedCountdownRegex: /^La pagina verrà sbloccata tra \d+ secondi\.$/,
+		expectedCommandOptions: "Apri la pagina delle opzioni",
 	},
 	{
 		uiLang: "it",
 		expectedHtmlLang: "it",
+		expectedBlockedTitle: "Sito bloccato",
 		expectedWarning: "La pagina a cui stai tentando di accedere è stata bloccata da LeechBlock.",
 		expectedPasswordPrompt: "Inserisci la password per accedere alla pagina bloccata:",
+		expectedPopupOptions: "Opzioni",
+		expectedResetRolloverHasBr: true,
+		expectedCountdownRegex: /^La pagina verrà sbloccata tra \d+ secondi\.$/,
+		expectedCommandOptions: "Apri la pagina delle opzioni",
 	},
 	{
 		uiLang: "en",
 		expectedHtmlLang: "en",
+		expectedBlockedTitle: "Site Blocked",
 		expectedWarning: "The page you're trying to access has been blocked by LeechBlock.",
 		expectedPasswordPrompt: "Enter the password to access the blocked page:",
+		expectedPopupOptions: "Options",
+		expectedResetRolloverHasBr: false,
+		expectedCountdownRegex: /^The page will be unblocked in \d+ second\(s\)\.$/,
+		expectedCommandOptions: "Open the options page",
 	},
 ];
 
@@ -174,7 +194,17 @@ async function dismissVisibleJQueryDialog(page, dialogSelector, timeoutMs = 1000
 }
 
 async function runLanguageScenario(config, port) {
-	const { uiLang, expectedHtmlLang, expectedWarning, expectedPasswordPrompt } = config;
+	const {
+		uiLang,
+		expectedHtmlLang,
+		expectedBlockedTitle,
+		expectedWarning,
+		expectedPasswordPrompt,
+		expectedPopupOptions,
+		expectedResetRolloverHasBr,
+		expectedCountdownRegex,
+		expectedCommandOptions,
+	} = config;
 	const workDir = fs.mkdtempSync(path.join(os.tmpdir(), `lbng-e2e-${uiLang}-`));
 	const userDataDir = path.join(workDir, "profile");
 	const extDir = path.join(workDir, "ext");
@@ -278,6 +308,52 @@ async function runLanguageScenario(config, port) {
 		recordResult(uiLang, "upgrade-keeps-id", upgradedId === extId, `extId=${upgradedId}`);
 		await waitForOptionsLoaded(sw);
 
+		// 4.0 Verify effective Chromium UI language and localized command description
+		const effectiveUiLang = await sw.evaluate(() => chrome.i18n.getUILanguage());
+		const expectedUiLangPrefix = uiLang.split("-")[0].toLowerCase();
+		const uiLangOk =
+			typeof effectiveUiLang === "string" &&
+			effectiveUiLang.toLowerCase().startsWith(expectedUiLangPrefix);
+		recordResult(
+			uiLang,
+			"upgrade-ui-language",
+			uiLangOk,
+			`getUILanguage()="${effectiveUiLang}" (expected prefix "${expectedUiLangPrefix}")`
+		);
+
+		const commands = await sw.evaluate(() => chrome.commands.getAll());
+		const optionsCmd = Array.isArray(commands) ? commands.find((c) => c.name === "lb-options") : null;
+		recordResult(
+			uiLang,
+			"upgrade-command-i18n",
+			optionsCmd?.description === expectedCommandOptions,
+			`lb-options="${optionsCmd?.description || ""}" (expected "${expectedCommandOptions}")`
+		);
+
+		// 4.1 Verify popup.html localization and Italian line breaks
+		const popupPage = await context.newPage();
+		attachErrorCollectors(popupPage, extId, extensionErrors);
+		await popupPage.goto(`chrome-extension://${extId}/popup.html`, { waitUntil: "domcontentloaded" });
+		await popupPage.waitForSelector("#options", { timeout: 10000 });
+		const popupInfo = await popupPage.evaluate(() => ({
+			htmlLang: document.documentElement.lang,
+			optionsText: document.querySelector("#options")?.textContent?.trim() || "",
+			resetRolloverHasBr: document.querySelector("#resetRollover br") !== null,
+			discardTimeHasBr: document.querySelector("#discardTime br") !== null,
+		}));
+		const popupOk =
+			popupInfo.htmlLang === expectedHtmlLang &&
+			popupInfo.optionsText === expectedPopupOptions &&
+			popupInfo.resetRolloverHasBr === expectedResetRolloverHasBr &&
+			popupInfo.discardTimeHasBr === expectedResetRolloverHasBr;
+		recordResult(
+			uiLang,
+			"upgrade-popup-i18n",
+			popupOk,
+			`lang=${popupInfo.htmlLang}, #options="${popupInfo.optionsText}", #resetRollover<br>=${popupInfo.resetRolloverHasBr}, #discardTime<br>=${popupInfo.discardTimeHasBr}`
+		);
+		await popupPage.close();
+
 		// 4a. Visit 127.0.0.1 -> expect chrome-extension://<id>/blocked.html?...
 		const blockedPage = await context.newPage();
 		attachErrorCollectors(blockedPage, extId, extensionErrors);
@@ -294,23 +370,61 @@ async function runLanguageScenario(config, port) {
 			}
 		);
 		await blockedPage.waitForSelector("#lbWarningMsgDiv h1", { timeout: 10000 });
+		await blockedPage.waitForFunction(() => /\(.+\)$/.test(document.title), { timeout: 10000 });
 		const blockedInfo = await blockedPage.evaluate(() => ({
 			url: location.href,
 			pathname: location.pathname,
 			htmlLang: document.documentElement.lang,
+			title: document.title,
+			blockedSetText: document.getElementById("lbBlockedSet")?.innerText?.trim() || "",
 			warningText: document.querySelector("#lbWarningMsgDiv h1")?.textContent?.trim() || "",
 		}));
 		const blockedUrlOk =
 			blockedUrl.startsWith(`chrome-extension://${extId}/blocked.html?`) &&
 			blockedInfo.pathname === "/blocked.html";
+		const expectedTitleWithSuffix = `${expectedBlockedTitle} (${blockedInfo.blockedSetText})`;
+		const blockedTitleOk =
+			blockedInfo.blockedSetText.length > 0 &&
+			blockedInfo.title === expectedTitleWithSuffix;
 		recordResult(uiLang, "upgrade-blocked-url", blockedUrlOk, `url=${blockedInfo.url}`);
 		recordResult(
 			uiLang,
 			"upgrade-blocked-i18n",
-			blockedInfo.htmlLang === expectedHtmlLang && blockedInfo.warningText === expectedWarning,
-			`lang=${blockedInfo.htmlLang} (expected ${expectedHtmlLang}), heading="${blockedInfo.warningText}"`
+			blockedInfo.htmlLang === expectedHtmlLang &&
+				blockedInfo.warningText === expectedWarning &&
+				blockedTitleOk,
+			`lang=${blockedInfo.htmlLang} (expected ${expectedHtmlLang}), title="${blockedInfo.title}", heading="${blockedInfo.warningText}"`
 		);
 		await blockedPage.close();
+
+		// 4a-delayed. Open delayed.html with a real-redirect query and verify #lbDelaySeconds inside localized countdown
+		const delayedPage = await context.newPage();
+		attachErrorCollectors(delayedPage, extId, extensionErrors);
+		await delayedPage.goto(
+			`chrome-extension://${extId}/delayed.html?1&http://127.0.0.1:${port}/`,
+			{ waitUntil: "domcontentloaded" }
+		);
+		await delayedPage.waitForSelector("#lbCountdownText", { timeout: 10000 });
+		const delayedInfo = await delayedPage.evaluate(() => {
+			const countdown = document.getElementById("lbCountdownText");
+			const delaySpan = countdown ? countdown.querySelector("#lbDelaySeconds") : null;
+			return {
+				htmlLang: document.documentElement.lang,
+				hasDelaySpanInCountdown: Boolean(delaySpan),
+				countdownText: countdown?.textContent?.trim() || "",
+			};
+		});
+		const delayedOk =
+			delayedInfo.htmlLang === expectedHtmlLang &&
+			delayedInfo.hasDelaySpanInCountdown &&
+			expectedCountdownRegex.test(delayedInfo.countdownText);
+		recordResult(
+			uiLang,
+			"upgrade-delayed-i18n",
+			delayedOk,
+			`lang=${delayedInfo.htmlLang}, #lbDelaySeconds=${delayedInfo.hasDelaySpanInCountdown}, countdown="${delayedInfo.countdownText}"`
+		);
+		await delayedPage.close();
 
 		// 4b. Visit localhost -> expect chrome-extension://<id>/password.html?...
 		const passwordPage = await context.newPage();

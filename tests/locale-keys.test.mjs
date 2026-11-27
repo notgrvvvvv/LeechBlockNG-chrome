@@ -74,6 +74,151 @@ function extractManifestMsgKeys(manifestText) {
 	return keys;
 }
 
+const VOID_HTML_TAGS = new Set([
+	"area",
+	"base",
+	"br",
+	"col",
+	"embed",
+	"hr",
+	"img",
+	"input",
+	"link",
+	"meta",
+	"param",
+	"source",
+	"track",
+	"wbr",
+]);
+
+function extractPlaceholders(message) {
+	const names = new Set();
+	if (typeof message !== "string") {
+		return names;
+	}
+	const regex = /\{([A-Za-z0-9_-]+)\}/g;
+	let match;
+	while ((match = regex.exec(message)) !== null) {
+		names.add(match[1]);
+	}
+	return names;
+}
+
+function getHtmlAttr(attrsText, attrName) {
+	if (!attrsText) return null;
+	const regex = new RegExp(`\\b${attrName}\\s*=\\s*(?:"([^"]*)"|'([^']*)')`, "i");
+	const match = regex.exec(attrsText);
+	return match ? (match[1] ?? match[2] ?? "") : null;
+}
+
+function extractHtmlI18nElements(html) {
+	const cleaned = html.replace(/<!--[\s\S]*?-->/g, "");
+	const tagRegex = /<(\/?)([A-Za-z][A-Za-z0-9-]*)(\s[^>]*?)?(\/?)>/g;
+	const stack = [];
+	const elements = [];
+
+	let match;
+	while ((match = tagRegex.exec(cleaned)) !== null) {
+		const isClosing = match[1] === "/";
+		const tagName = match[2].toLowerCase();
+		const attrsText = match[3] || "";
+		const isSelfClosing = match[4] === "/" || VOID_HTML_TAGS.has(tagName);
+
+		if (isClosing) {
+			for (let i = stack.length - 1; i >= 0; i--) {
+				if (stack[i].tagName === tagName) {
+					while (stack.length > i) {
+						const popped = stack.pop();
+						if (popped.i18nKey) {
+							elements.push({ key: popped.i18nKey, slots: popped.slots });
+						}
+					}
+					break;
+				}
+			}
+			continue;
+		}
+
+		const dataSlot = getHtmlAttr(attrsText, "data-slot");
+		const id = getHtmlAttr(attrsText, "id");
+		const slotName = dataSlot || id;
+		if (slotName) {
+			for (const ancestor of stack) {
+				if (ancestor.i18nKey) {
+					ancestor.slots.add(slotName);
+				}
+			}
+		}
+
+		const i18nKey = getHtmlAttr(attrsText, "data-i18n");
+		if (isSelfClosing) {
+			if (i18nKey) {
+				elements.push({ key: i18nKey, slots: new Set() });
+			}
+		} else {
+			stack.push({ tagName, i18nKey, slots: new Set() });
+		}
+	}
+
+	while (stack.length > 0) {
+		const popped = stack.pop();
+		if (popped.i18nKey) {
+			elements.push({ key: popped.i18nKey, slots: popped.slots });
+		}
+	}
+
+	return elements;
+}
+
+function checkHtmlSlotParity(html, catalog) {
+	const mismatches = [];
+	const elements = extractHtmlI18nElements(html);
+
+	for (const { key, slots } of elements) {
+		const entry = catalog[key];
+		if (!entry) continue;
+		const placeholders = extractPlaceholders(entry.message);
+		if (placeholders.size === 0 && slots.size === 0) continue;
+
+		const missingInHtml = [...placeholders].filter((p) => !slots.has(p)).sort();
+		const unusedInMsg = [...slots].filter((s) => !placeholders.has(s)).sort();
+		if (missingInHtml.length > 0 || unusedInMsg.length > 0) {
+			const parts = [];
+			if (missingInHtml.length > 0) {
+				parts.push(`missing slots in HTML: ${missingInHtml.join(", ")}`);
+			}
+			if (unusedInMsg.length > 0) {
+				parts.push(`unreferenced slots in message: ${unusedInMsg.join(", ")}`);
+			}
+			mismatches.push(`${key}: ${parts.join("; ")}`);
+		}
+	}
+
+	return { ok: mismatches.length === 0, mismatches };
+}
+
+function comparePlaceholderSets(enCatalog, itCatalog) {
+	const mismatches = [];
+	for (const key of Object.keys(enCatalog)) {
+		if (!Object.hasOwn(itCatalog, key)) continue;
+		const enSet = extractPlaceholders(enCatalog[key].message);
+		const itSet = extractPlaceholders(itCatalog[key].message);
+		const missingInIt = [...enSet].filter((p) => !itSet.has(p)).sort();
+		const missingInEn = [...itSet].filter((p) => !enSet.has(p)).sort();
+		if (missingInIt.length > 0 || missingInEn.length > 0) {
+			const parts = [];
+			if (missingInIt.length > 0) {
+				parts.push(`missing in it: ${missingInIt.join(", ")}`);
+			}
+			if (missingInEn.length > 0) {
+				parts.push(`missing in en: ${missingInEn.join(", ")}`);
+			}
+			mismatches.push(`${key}: ${parts.join("; ")}`);
+		}
+	}
+	return { ok: mismatches.length === 0, mismatches };
+}
+
 test("negative control: compareCatalogKeys reports a missing key when catalogs differ", () => {
 	const base = {
 		a: { message: "A" },
@@ -162,4 +307,52 @@ test("_locales contains only en and it, no per-language HTML folders remain, and
 	const it = readJson("_locales/it/messages.json");
 	assert.equal(en.localePath?.message, "/");
 	assert.equal(it.localePath?.message, "/");
+});
+
+test("negative control: checkHtmlSlotParity reports missing and unreferenced slots", () => {
+	const sampleHtml = '<p data-i18n="countdown">In <span id="lbDelaySeconds">0</span> s</p>';
+
+	const missingSlotCatalog = {
+		countdown: { message: "In {lbDelaySeconds} and {extra} s" },
+	};
+	const missingResult = checkHtmlSlotParity(sampleHtml, missingSlotCatalog);
+	assert.equal(missingResult.ok, false);
+	assert.match(missingResult.mismatches.join("\n"), /missing slots in HTML: extra/);
+
+	const unreferencedSlotCatalog = {
+		countdown: { message: "Countdown without placeholder" },
+	};
+	const unreferencedResult = checkHtmlSlotParity(sampleHtml, unreferencedSlotCatalog);
+	assert.equal(unreferencedResult.ok, false);
+	assert.match(unreferencedResult.mismatches.join("\n"), /unreferenced slots in message: lbDelaySeconds/);
+});
+
+test("negative control: comparePlaceholderSets reports mismatched placeholders between en and it", () => {
+	const enSample = { msg: { message: "Hello {link}" } };
+	const itSample = { msg: { message: "Ciao {other}" } };
+	const result = comparePlaceholderSets(enSample, itSample);
+	assert.equal(result.ok, false);
+	assert.match(result.mismatches.join("\n"), /missing in it: link/);
+	assert.match(result.mismatches.join("\n"), /missing in en: other/);
+});
+
+test("HTML slot parity: every data-i18n element with placeholders matches its descendant slots in en and it", () => {
+	const en = readJson("_locales/en/messages.json");
+	const it = readJson("_locales/it/messages.json");
+
+	for (const relPath of LOCALIZED_HTML_FILES) {
+		const html = fs.readFileSync(path.join(ROOT, relPath), "utf8");
+		const enCheck = checkHtmlSlotParity(html, en);
+		assert.equal(enCheck.ok, true, `${relPath} (en) slot mismatch: ${enCheck.mismatches.join("; ")}`);
+
+		const itCheck = checkHtmlSlotParity(html, it);
+		assert.equal(itCheck.ok, true, `${relPath} (it) slot mismatch: ${itCheck.mismatches.join("; ")}`);
+	}
+});
+
+test("placeholder sets are identical between en and it for every catalog key", () => {
+	const en = readJson("_locales/en/messages.json");
+	const it = readJson("_locales/it/messages.json");
+	const result = comparePlaceholderSets(en, it);
+	assert.equal(result.ok, true, `Placeholder mismatch between en and it: ${result.mismatches.join("; ")}`);
 });

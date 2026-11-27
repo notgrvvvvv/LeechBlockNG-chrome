@@ -23,18 +23,40 @@
 		return chrome.i18n.getMessage(key) || "";
 	}
 
+	function appendTextWithLineBreaks(fragment, text) {
+		const lines = text.split("\n");
+		for (let i = 0; i < lines.length; i++) {
+			if (i > 0) {
+				fragment.appendChild(document.createElement("br"));
+			}
+			if (lines[i]) {
+				fragment.appendChild(document.createTextNode(lines[i]));
+			}
+		}
+	}
+
 	function applyMessage(el, message) {
-		if (!HAS_PLACEHOLDER.test(message)) {
-			if (el.tagName === "TITLE") {
-				document.title = message;
-			} else {
+		if (el.tagName === "TITLE") {
+			document.title = message;
+			return;
+		}
+
+		const slotChildren = Array.from(el.querySelectorAll("[id], [data-slot]"));
+		const hasPlaceholder = HAS_PLACEHOLDER.test(message);
+
+		if (!hasPlaceholder && slotChildren.length === 0) {
+			if (!message.includes("\n")) {
 				el.textContent = message;
+			} else {
+				const fragment = document.createDocumentFragment();
+				appendTextWithLineBreaks(fragment, message);
+				el.replaceChildren(fragment);
 			}
 			return;
 		}
 
 		const slots = new Map();
-		for (const child of el.querySelectorAll("[id], [data-slot]")) {
+		for (const child of slotChildren) {
 			const slotName = child.getAttribute("data-slot");
 			if (slotName && !slots.has(slotName)) {
 				slots.set(slotName, child);
@@ -44,14 +66,31 @@
 			}
 		}
 
-		const fragment = document.createDocumentFragment();
-		for (const part of message.split(PLACEHOLDER_SPLIT)) {
+		const parts = message.split(PLACEHOLDER_SPLIT);
+		const referencedChildren = new Set();
+		for (const part of parts) {
 			if (!part) continue;
 			const match = PLACEHOLDER_NAME.exec(part);
-			if (match && slots.has(match[1])) {
+			if (!match) continue;
+			const child = slots.get(match[1]);
+			if (!child || referencedChildren.has(child)) {
+				return;
+			}
+			referencedChildren.add(child);
+		}
+
+		if (referencedChildren.size !== slotChildren.length) {
+			return;
+		}
+
+		const fragment = document.createDocumentFragment();
+		for (const part of parts) {
+			if (!part) continue;
+			const match = PLACEHOLDER_NAME.exec(part);
+			if (match) {
 				fragment.appendChild(slots.get(match[1]));
 			} else {
-				fragment.appendChild(document.createTextNode(part));
+				appendTextWithLineBreaks(fragment, part);
 			}
 		}
 		el.replaceChildren(fragment);

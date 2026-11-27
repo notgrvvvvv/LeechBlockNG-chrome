@@ -64,9 +64,9 @@
 
 	"popupCancelOverride": { "message": "Annulla Permesso" },
 
-	"popupResetRollover": { "message": "Reimposta il Tempo di Rollover" },
+	"popupResetRollover": { "message": "Reimposta il Tempo\ndi Rollover" },
 
-	"popupDiscardTime": { "message": "Scarta il Tempo Rimanente" },
+	"popupDiscardTime": { "message": "Scarta il Tempo\nRimanente" },
 
 	"popupOnlineSupport": { "message": "Supporto Online" },
 
