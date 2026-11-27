@@ -489,7 +489,7 @@
       "id": "accessPassword",
       "control": "input:password",
       "section": "Access Control",
-      "affectsRuleSummary": false
+      "affectsRuleSummary": true
     },
     "hpp": {
       "type": "boolean",
@@ -593,7 +593,7 @@
       "id": "overridePassword",
       "control": "input:password",
       "section": "Temporary Override",
-      "affectsRuleSummary": false
+      "affectsRuleSummary": true
     },
     "orc": {
       "type": "boolean",
@@ -753,7 +753,7 @@
       "id": "allowLBWebsite",
       "control": "input:checkbox",
       "section": "Miscellaneous",
-      "affectsRuleSummary": false
+      "affectsRuleSummary": true
     },
     "diagMode": {
       "type": "boolean",
