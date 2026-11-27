@@ -582,9 +582,20 @@ function setTheme(theme) {
 	}
 }
 
+// Normalize legacy localized block-page URLs (e.g. "it/blocked.html?$S&$U" -> "blocked.html?$S&$U")
+//
+function normalizeLegacyBlockURL(url) {
+	if (typeof url !== "string") {
+		return url;
+	}
+	let match = /^\/?(?:\w+\/)?((?:blocked|delayed|password)\.html\?\$S&\$U)$/.exec(url);
+	return match ? match[1] : url;
+}
+
 // Get localized version of extension page
 //
 function getLocalizedURL(url) {
+	url = normalizeLegacyBlockURL(url);
 	return (ABSOLUTE_URL.test(url))
 			? url // no localization for absolute URL
 			: browser.i18n.getMessage("localePath") + url;

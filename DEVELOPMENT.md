@@ -18,3 +18,12 @@ Run all inventory and pure-function checks with:
 node --test tests/*.test.mjs
 ```
 
+## Legacy localized block URLs
+
+Saved or imported `blockURL<N>` values matching the exact legacy internal form `^\/?(?:\w+\/)?((?:blocked|delayed|password)\.html\?\$S&\$U)$` (for example `it/blocked.html?$S&$U`, `/pt_BR/password.html?$S&$U`, or `/delayed.html?$S&$U`) are normalized to `<page>.html?$S&$U` by `normalizeLegacyBlockURL()` in `common.js` (called from `getLocalizedURL()` at runtime and when loading or importing options in `options.js`).
+
+Absolute `chrome-extension://<id>/<lang>/...` URLs and all other variants (extra query parameters, fragments, different casing, nested path segments, or other filenames) are left byte-identical and remain unsupported.
+
+Updating `common.js:getLocalizedURL()` with this helper is the authorized surgical exception to the frozen blocking engine.
+
+
