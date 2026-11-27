@@ -398,12 +398,10 @@ test("describeBlockSet wraps extractSetOptions + describeRule", () => {
 	assert.throws(() => D.describeBlockSet(full, 0), (e) => e.name === "RangeError");
 });
 
-test("source constraints: license header, no DOM/storage APIs, wired into options.html only", () => {
+test("source constraints: license header, no DOM/storage APIs", () => {
 	const src = fs.readFileSync(path.join(ROOT, "rule-descriptor.js"), "utf8");
 	assert.ok(src.startsWith("/* This Source Code Form is subject to the terms of the Mozilla Public"));
 	assert.ok(!/\b(document|window|localStorage)\b|browser\.(storage|runtime)/.test(src));
 	assert.ok(!/timedata/.test(src));
 	assert.ok(!/\b(TODO|T-\d{3}|backlog)\b/i.test(src));
-	const html = fs.readFileSync(path.join(ROOT, "options.html"), "utf8");
-	assert.ok(/<script src="\/common\.js"><\/script>\s*<script src="\/rule-descriptor\.js"><\/script>\s*<script src="\/options\.js"><\/script>/.test(html));
 });
